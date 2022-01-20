@@ -131,3 +131,4 @@ src/
 document_tfidf_vectorizer.pickel
 tv_doc_corpus_data.pickel
 tv_section_corpus_data.pickel
+/data/*

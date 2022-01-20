@@ -1,5 +1,4 @@
 # python
-import json
 import pickle
 import string
 
@@ -15,33 +14,30 @@ from prefect import task, Flow, Parameter
 from prefect.executors import LocalDaskExecutor
 
 from utils import xml_to_sections, text_cleaning, getHeader, getEnum
-from constants import PATH_116_USLM, PATH_117_USLM, NAMESPACES, BILL_CORPUS_FILE, SECTION_CORPUS_FILE, BILL_VECTOR_FILE, SECTION_VECTOR_FILE
-
-# Flow to 
-
+from constants import DATA_DIR, NAMESPACES, BILL_CORPUS_FILE, SECTION_CORPUS_FILE, BILL_VECTOR_FILE, SECTION_VECTOR_FILE
 
 
 # Accepts array of directories containing USLM bills (116th, congress, 117th congress etc) 
 # Returns file paths 
 @task(log_stdout=True)
-def get_bill_file_paths(dirs):
+def get_bill_file_paths():
     bill_files = []
-    print('Finding bill files')
 
-    for d in dirs:
-        if os.path.isdir(d) == False:
-            print("Bill directory not found")
+    for congress_session_dir in os.listdir(DATA_DIR):
+        if (os.path.isdir(os.path.join(DATA_DIR, congress_session_dir)) == False):
+            continue
+        print('Processing from: ', congress_session_dir)
+        for bill_dir in os.listdir(os.path.join(DATA_DIR, congress_session_dir)):
+            for bill_file in os.listdir(os.path.join(DATA_DIR, congress_session_dir, bill_dir)):
+                if bill_file.endswith('uslm.xml'):
+                    bill_files.append(os.path.join(DATA_DIR, congress_session_dir, bill_dir, bill_file))
 
-        for f in os.listdir(d):
-            if f.endswith('.xml'):
-                print(f)
-                bill_files.append(os.path.join(d, f))
     
     print(f'{len(bill_files)} bill files found')
-    return bill_files
 
+    return bill_files
+    
 # Accepts list of fully qualified USLM bill paths
-# Returns 
 @task(log_stdout=True)
 def extract_transform_load_bills(bill_files): 
     print('Beginning ETL step')
@@ -93,7 +89,7 @@ def vectorize_corpus(corpus_data, output_filename):
     return tfidf_vectorizer
 
 with Flow("vectorize_bills", executor=LocalDaskExecutor()) as flow:
-    file_paths = get_bill_file_paths([PATH_117_USLM, PATH_116_USLM])
+    file_paths = get_bill_file_paths()
     bill_data = extract_transform_load_bills(file_paths)
     doc_vectors = vectorize_corpus(bill_data[0], BILL_VECTOR_FILE)
     section_vectors = vectorize_corpus(bill_data[1], SECTION_VECTOR_FILE)
