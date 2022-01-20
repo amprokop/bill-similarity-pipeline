@@ -2,6 +2,12 @@
 
 A set of Prefect flows to compre bills and surface similar bills using ElasticSearch index and cosine similarity calculations of TFIDF weighted vectors.
 
+There are currently three flows:
+
+- Generating the vector representation for the USLM files for the last three Congresses (115, 116, 117)
+- Saving cosine similarity scores for a group of bills
+- Taking a particular bill, turning it into a vector, and comparing it to 30 other bills
+
 ## Startup instructions
 
 ### Install requirements
