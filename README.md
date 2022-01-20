@@ -48,7 +48,7 @@ To enable parallelization, Prefect flows are run by agents that are decoupled fr
 prefect agent local start
 ```
 
-The UI will be available on localhost:8080. You can navigate there, find a flow flow, and run it.
+The UI will be available on localhost:8080. You can navigate there, find a flow, and run it.
 
 ### Inspect data
 
